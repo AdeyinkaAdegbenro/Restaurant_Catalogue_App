@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Restaurant Catalogue App</title>
+	<link rel="stylesheet" type="text/css" href="/static/app.css">
+</head>
+<body>
+    <div class="header">
+        <a href="{{ url_for('all_restaurants') }}">Home</a>
+        {% if current_user.is_anonymous %}
+	        <a href="{{ url_for('login') }}">Login</a>
+        {% else %}
+	        <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+	    {% for message in messages %}
+	      <li>{{ message }}</li>
+	    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% block body %}
+{% endblock %}
+</body>
+</html>

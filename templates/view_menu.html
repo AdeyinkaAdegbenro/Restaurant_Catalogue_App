@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block body %}
+	<div class="description"><p>name: {{ menu.name }}</p>
+		<p>price: {{ menu.price }}</p>
+		<p>course: {{ menu.course }}</p>
+		<p>description: {{ menu.description }}</p>
+		<br><a href="/restaurant/{{restaurant_id}}/menu/{{menu_id}}/edit" class="options">Edit</a>
+		<br><a href="/restaurant/{{restaurant_id}}/menu/{{menu_id}}/delete" class="options">Delete</a>
+	</div>
+{% endblock %}

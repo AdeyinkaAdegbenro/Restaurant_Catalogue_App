@@ -1,0 +1,43 @@
+body {
+	
+}
+
+ul{
+	margin-right: 30px;
+}
+
+ul li {
+	list-style-type: none;
+	border: 1px solid black;
+	background-color: #eee;
+	padding-left: 30px;
+}
+
+a {
+	text-decoration: none;
+}
+
+.flashes {
+	background-color: pink;
+}
+
+
+.header {
+	background-color: #00afbf;
+	width: 100%;
+	height: 50px;
+}
+
+.options {
+	margin: 5px;
+}
+
+.options:hover {
+	text-decoration-line: underline;
+}
+
+.description {
+	height: 60px;
+	width:50px;
+	border-radius: 3px;
+}

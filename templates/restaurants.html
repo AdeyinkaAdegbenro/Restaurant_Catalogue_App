@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block body %}
+	<a href="/restaurant/new">Create New Restaurant </a>
+	<ul>
+		{% for restaurant in restaurants %}
+			<li><a href="restaurant/{{ restaurant[1] }}">{{ restaurant[0] }}</a><br>
+				<a href="/restaurant/{{ restaurant[1] }}/edit" class="options">Edit</a>
+				<a href="/restaurant/{{ restaurant[1] }}/delete" class="options">Delete</a>
+			</li>
+		{% endfor %}
+	</ul>
+{%endblock%}

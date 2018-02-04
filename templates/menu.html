@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+		{% if not items %}
+			<p>No menu added yet </p>
+		{% endif %}
+		<a href="/restaurant/{{ restaurant_id }}/menu/new">Create New Menu </a>
+		<ul>
+			{% for item in items %}
+				<li><a href="/restaurant/{{ item[5] }}/menu/{{ item[1] }}">{{ item[0] }}</a>
+				</li>
+			{% endfor %}
+		</ul>
+{% endblock %}
