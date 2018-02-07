@@ -3,6 +3,13 @@
  It can be set up by cloning this repository by running
  `git clone https://github.com/AdeyinkaAdegbenro/Restaurant_Catalogue_App.git`
 
+ and then installing the dependencies
+ `pip install Flask`
+ `pip install flask-login`
+ `pip install requests-oauthlib`
+ `pip install flask-wtf`
+ `pip install sqlalchemy`
+
  and then running 
  `$ python final_project.py`
 
