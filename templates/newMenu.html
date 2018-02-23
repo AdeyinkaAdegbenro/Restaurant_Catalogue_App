@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Create New Menu Item</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block body %}
 	<form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant_id }}/menu/new">
 		<h2>Add a New Menu Item</h2>
 			Name<input name="name" type="text"><br>
@@ -12,5 +9,4 @@
 			Description<input name="description" type="text"><br>
 			<input type="submit" value="Submit">
 	</form>
-</body>
-</html>
+{% endblock %}

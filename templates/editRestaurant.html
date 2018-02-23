@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block body %}
+
 	<form method="POST" enctype="multipart/form-data" action="{{ path }}">
 		<h2>Edit Restaurant Name</h2>
 		<input name="editrestaurant" type="text">
 		<input type="submit" value="Submit">
 	</form>
-</body>
-</html>
+{% endblock %}
