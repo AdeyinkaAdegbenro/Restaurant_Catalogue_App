@@ -9,7 +9,7 @@ from urllib2 import HTTPError
 from sqlalchemy.orm import sessionmaker
 from config import Config, Auth
 from forms import LoginForm, SignUpForm
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_login import current_user, login_user, logout_user, login_required
 from requests_oauthlib import OAuth2Session
 from werkzeug.urls import url_parse
@@ -113,6 +113,7 @@ def logout():
     logout_user()
     return redirect(url_for('all_restaurants'))
 
+
 @app.route('/')
 @app.route('/restaurants')
 def all_restaurants():
@@ -154,9 +155,12 @@ def new_restaurants():
 def edit_restaurant(restaurant_id):
     # route to edit a restaurant data
     if request.method == 'POST':
-        editrestaurant(restaurant_id, request.form['editrestaurant'])
-        flash('restaurant has been edited!')
-        return redirect('/restaurants')
+        message = editrestaurant(restaurant_id, request.form['editrestaurant'])
+        if message:
+            return redirect(url_for('new_restaurants'))
+        else:
+            flash('restaurant has been edited!')
+            return redirect('/restaurants')
     return render_template('editRestaurant.html', path=request.path)
 
 
@@ -166,8 +170,9 @@ def delete_restaurant(restaurant_id):
     # route to delete a restuarant
     if request.method == 'POST':
         if request.form['submit'] == 'Yes':
-            deleterestaurant(restaurant_id)
-            flash('restaurant has been deleted!')
+            message = deleterestaurant(restaurant_id)
+            if not message:
+                flash('restaurant has been deleted!')
         return redirect('/restaurants')
     return render_template('deleteRestaurant.html')
 
@@ -217,7 +222,10 @@ def new_menu(restaurant_id):
         price = request.form['price']
         description = request.form['description']
         course = request.form['course']
-        add_new_menu(restaurant_id, [name, price, course, description])
+        message = add_new_menu(
+            restaurant_id, [name, price, course, description])
+        if message:
+            return redirect(url_for('new_restaurants'))
         flash('menu item has been added!')
         return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     return render_template('newMenu.html', restaurant_id=restaurant_id)
@@ -233,9 +241,13 @@ def edit_menu(restaurant_id, menu_id):
         price = request.form['price']
         description = request.form['description']
         course = request.form['course']
-        editmenu(restaurant_id, [name, price, course, description])
-        flash('menu item has been added!')
-        return redirect(url_for('show_menu', restaurant_id=restaurant_id))
+        message = editmenu(
+            restaurant_id, menu_id, [name, price, course, description])
+        if message:
+            return redirect(url_for('new_restaurants'))
+        else:
+            flash('menu item has been added!')
+            return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     return render_template('editMenu.html', data={
         'restaurant_id': restaurant_id,
         'menu_id': menu_id})
@@ -248,15 +260,17 @@ def delete_menu(restaurant_id, menu_id):
     # route to delete a menu
     if request.method == 'POST':
         if request.form['submit'] == 'Yes':
-            deletemenu(restaurant_id, menu_id)
-            flash('Menu Item deleted!')
+            message = deletemenu(restaurant_id, menu_id)
+            if not message:
+                flash('Menu Item deleted!')
         return redirect(url_for('show_menu', restaurant_id=restaurant_id))
     return render_template('deleteMenu.html', path=request.path)
 
 
 def add_new_restaurant(restaurant_name):
     # helper function to add a restaurant
-    new_restaurant = Restaurant(name=restaurant_name)
+    new_restaurant = Restaurant(
+        name=restaurant_name, user_id=current_user.get_id())
     db_session.add(new_restaurant)
     db_session.commit()
 
@@ -265,32 +279,54 @@ def editrestaurant(restaurant_id, new_name):
     # helper function to edit a restaurant
     restaurant = db_session.query(Restaurant).filter_by(
         id=restaurant_id).first()
+    if restaurant.user_id != current_user.get_id():
+        flash('You are not authorized to edit this restaurant')
+        return 'not authorized'
     restaurant.name = new_name
     db_session.add(restaurant)
     db_session.commit()
+    return None
 
 
 def deleterestaurant(restaurant_id):
     # helper function to delete a restaurant
     restaurant = db_session.query(Restaurant).filter_by(
         id=restaurant_id).first()
+    if restaurant.user_id != current_user.get_id():
+        flash('You are not authorized to delete this restaurant')
+        return 'not authorized'
     db_session.delete(restaurant)
     db_session.commit()
 
 
 def add_new_menu(restaurant_id, menu_name):
     # helper function to add a menu
+    restaurant = db_session.query(Restaurant).filter_by(
+        id=restaurant_id).first()
+    user_id = restaurant.user_id
+    if current_user.get_id() != user_id:
+        flash('you are not authorized to create a menu for this restaurant')
+        return 'not authorized'
     new_menu = MenuItem(name=menu_name[0], price=menu_name[1],
                         course=menu_name[2], description=menu_name[3],
-                        restaurant_id=restaurant_id)
+                        restaurant_id=restaurant_id, user_id=user_id)
+    print 'new_menu', new_menu.user_id
     db_session.add(new_menu)
     db_session.commit()
 
 
-def editmenu(menu_id, new_menu):
+def editmenu(restaurant_id, menu_id, new_menu):
     # helper function to edit a menu
+    restaurant = db_session.query(Restaurant).filter_by(
+        id=restaurant_id).first()
+    # menu creator id
+    user_id = restaurant.user_id
+    if current_user.get_id() != user_id:
+        flash('You are not authorized to edit this menu')
+        return 'Not authorized'
     menuitem = db_session.query(MenuItem).filter_by(
-        id=menu_id).one()
+        id=menu_id).first()
+    print 'MENU ITEM', menuitem
     menuitem.name = new_menu[0]
     menuitem.price = new_menu[1]
     menuitem.course = new_menu[2]
@@ -301,6 +337,13 @@ def editmenu(menu_id, new_menu):
 
 def deletemenu(restaurant_id, menu_id):
     # helper function to delete a menu
+    restaurant = db_session.query(Restaurant).filter_by(
+        id=restaurant_id).first()
+    # menu creator id
+    user_id = restaurant.user_id
+    if current_user.get_id() != user_id:
+        flash('You are not authorized to delete this menu')
+        return 'Not authorized'
     menuitem = db_session.query(MenuItem).filter_by(
         restaurant_id=restaurant_id, id=menu_id).one()
     db_session.delete(menuitem)

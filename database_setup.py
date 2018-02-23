@@ -16,12 +16,19 @@ class User(UserMixin, Base):
     id = Column(Integer, primary_key=True)
     email = Column(String(100), unique=True, nullable=False)
     username = Column(String(100), nullable=True)
+    restaurants = relationship('Restaurant', backref='user', lazy=True)
+
+    def get_id(self):
+        return self.id
 
 
 class Restaurant(Base):
     __tablename__ = 'restaurant'
     name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
+    menu_item = relationship('MenuItem', cascade='all, delete-orphan')
+    user_id = Column(Integer, ForeignKey(User.id),
+                     nullable=False)
 
     @property
     def serialize(self):
@@ -40,6 +47,7 @@ class MenuItem(Base):
     price = Column(String(8))
     restaurant_id = Column(Integer, ForeignKey('restaurant.id'))
     restaurant = relationship(Restaurant)
+    user_id = Column(Integer, nullable=False)
 
     @property
     def serialize(self):
