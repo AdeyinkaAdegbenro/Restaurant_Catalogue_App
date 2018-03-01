@@ -59,5 +59,5 @@ class MenuItem(Base):
             'price': self.price
         }
 if __name__ == '__main__':
-    engine = create_engine('sqlite:///restaurantmenu.db')
+    engine = create_engine("postgresql://catalog:catalogpassword@localhost:5432/restaurantmenu")
     Base.metadata.create_all(engine)

@@ -1,6 +1,12 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import (
+    Flask,
+    render_template,
+    request, 
+    redirect,
+    flash,
+    url_for)
 from flask import session as session
-import sqlite3
+import psycopg2
 import random
 import string
 import os
@@ -15,7 +21,9 @@ from requests_oauthlib import OAuth2Session
 from werkzeug.urls import url_parse
 from database_setup import Restaurant, Base, MenuItem, User
 import json
-engine = create_engine('sqlite:///restaurantmenu.db')
+import psycopg2
+DBURL = "postgresql://catalog:catalogpassword@localhost:5432/restaurantmenu"
+engine = create_engine(DBURL)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 db_session = DBSession()
@@ -107,7 +115,6 @@ def login():
 
 
 @app.route('/logout')
-@login_required
 def logout():
     # route for logging out
     logout_user()
@@ -118,7 +125,7 @@ def logout():
 @app.route('/restaurants')
 def all_restaurants():
     # route to view all restaurant, also the home page
-    conn = sqlite3.connect('restaurantmenu.db')
+    conn = psycopg2.connect(DBURL)
     c = conn.cursor()
     c.execute('SELECT * FROM Restaurant')
     restaurants = c.fetchall()
@@ -181,7 +188,7 @@ def delete_restaurant(restaurant_id):
 @app.route('/restaurant/<int:restaurant_id>/menu')
 def show_menu(restaurant_id):
     # route to view all menus
-    conn = sqlite3.connect('restaurantmenu.db')
+    conn = psycopg2.connect(DBURL)
     c = conn.cursor()
     c.execute('SELECT * FROM menu_item where restaurant_id = {}'.format(
         restaurant_id))
@@ -353,4 +360,4 @@ if __name__ == "__main__":
     # app.secret_key = 'super_secret_key'
     app.debug = True
     app.config.from_object(Config)
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='127.0.0.1', port=5000)
